@@ -28,6 +28,13 @@ cd gradle
 ./gradlew clean build [install] [-PmavenLocal]
 ```
 
+## How to import projects into Eclipse
+
+* Run `./mvnw process-test-resources eclipse:eclipse`
+* And then import projects from Eclipse
+
+If you run tests in Eclipse, please activate `Preferences > Java > Debug > 'Only include exported classpath entries when launching'`.
+
 ## Referred Projects
 * [Asakusa Framework Core](https://github.com/asakusafw/asakusafw)
 * [Asakusa Framework Documentation](https://github.com/asakusafw/asakusafw-documentation)
