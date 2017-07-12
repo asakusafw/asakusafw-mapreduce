@@ -1,0 +1,53 @@
+group 'com.example'
+
+buildscript {
+    repositories {
+        if (System.getProperty("maven.local", "true") == "true") {
+            mavenLocal()
+        }
+        maven { url 'http://asakusafw.s3.amazonaws.com/maven/releases' }
+        maven { url 'http://asakusafw.s3.amazonaws.com/maven/snapshots' }
+    }
+    dependencies {
+        classpath group: 'com.asakusafw.mapreduce', 
+                  name: 'asakusa-mapreduce-gradle',
+                  version: System.getProperty("asakusafw-mapreduce.version")
+    }
+}
+
+if (System.getProperty("maven.local", "true") == "true") {
+    repositories {
+        mavenLocal()
+    }
+}
+
+apply plugin: 'asakusafw-sdk'
+apply plugin: 'asakusafw-organizer'
+apply plugin: 'asakusafw-mapreduce'
+apply plugin: 'eclipse'
+
+asakusafw {
+    sdk.testkit System.getProperty('sdk.testkit') ?: true
+}
+
+asakusafwOrganizer {
+    profiles.dev {
+        assembly.into('.') {
+            from 'src/main/conf'
+            replace([
+                'project.home.path' : file(System.getenv('PROJECT_HOME')).absolutePath,
+                'project.home.uri' : uri(System.getenv('PROJECT_HOME')).toString(),
+            ])
+        }
+    }
+}
+
+test {
+    testLogging {
+        showStandardStreams true
+        showExceptions true
+        showStackTraces true
+        showCauses true
+        exceptionFormat 'full'
+    }
+}
