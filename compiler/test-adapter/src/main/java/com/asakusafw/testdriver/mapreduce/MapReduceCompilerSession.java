@@ -29,6 +29,7 @@ import com.asakusafw.compiler.flow.ExternalIoCommandProvider;
 import com.asakusafw.compiler.flow.ExternalIoCommandProvider.CommandContext;
 import com.asakusafw.compiler.flow.JobFlowClass;
 import com.asakusafw.compiler.flow.JobFlowDriver;
+import com.asakusafw.compiler.flow.Location;
 import com.asakusafw.compiler.flow.jobflow.JobflowModel;
 import com.asakusafw.compiler.testing.BatchInfo;
 import com.asakusafw.compiler.testing.DirectBatchCompiler;
@@ -40,11 +41,8 @@ import com.asakusafw.testdriver.compiler.CompilerConstants;
 import com.asakusafw.testdriver.compiler.CompilerSession;
 import com.asakusafw.testdriver.compiler.FlowPortMap;
 import com.asakusafw.testdriver.compiler.JobflowMirror;
-import com.asakusafw.testdriver.compiler.TaskMirror;
 import com.asakusafw.testdriver.compiler.basic.BasicArtifactMirror;
 import com.asakusafw.testdriver.compiler.basic.BasicBatchMirror;
-import com.asakusafw.testdriver.compiler.basic.BasicCommandTaskMirror;
-import com.asakusafw.testdriver.compiler.basic.BasicHadoopTaskMirror;
 import com.asakusafw.testdriver.compiler.basic.BasicJobflowMirror;
 import com.asakusafw.testdriver.compiler.basic.BasicPortMirror;
 import com.asakusafw.testdriver.compiler.util.DeploymentUtil;
@@ -54,6 +52,11 @@ import com.asakusafw.vocabulary.flow.FlowDescription;
 import com.asakusafw.vocabulary.flow.graph.FlowGraph;
 import com.asakusafw.vocabulary.flow.graph.InputDescription;
 import com.asakusafw.vocabulary.flow.graph.OutputDescription;
+import com.asakusafw.workflow.model.DeleteTaskInfo;
+import com.asakusafw.workflow.model.TaskInfo;
+import com.asakusafw.workflow.model.basic.BasicCommandTaskInfo;
+import com.asakusafw.workflow.model.basic.BasicDeleteTaskInfo;
+import com.asakusafw.workflow.model.basic.BasicHadoopTaskInfo;
 
 class MapReduceCompilerSession implements CompilerSession {
 
@@ -80,11 +83,11 @@ class MapReduceCompilerSession implements CompilerSession {
         File workingDirectory = MapReduceCompierUtil.createTemporaryDirectory(configuration.getWorkingDirectory());
         File outputDirectory = new File(workingDirectory, "output"); //$NON-NLS-1$
         File buildDirectory = new File(workingDirectory, "build"); //$NON-NLS-1$
-        String runtimeDirectory = CompilerConstants.getRuntimeWorkingDirectory();
+        Location runtimeWorkingDirectory = getRuntimeWorkingDirectory();
         BatchInfo batchInfo = DirectBatchCompiler.compile(
                 driver.getDescription(),
                 "test.batch", //$NON-NLS-1$
-                MapReduceCompierUtil.createWorkingLocation(runtimeDirectory),
+                runtimeWorkingDirectory,
                 outputDirectory,
                 buildDirectory,
                 MapReduceCompierUtil.computeEmbeddedLibraries(configuration, dsl),
@@ -113,13 +116,13 @@ class MapReduceCompilerSession implements CompilerSession {
         File workingDirectory = MapReduceCompierUtil.createTemporaryDirectory(configuration.getWorkingDirectory());
         File outputDirectory = new File(workingDirectory, "output"); //$NON-NLS-1$
         File buildDirectory = new File(workingDirectory, "build"); //$NON-NLS-1$
-        String runtimeDirectory = CompilerConstants.getRuntimeWorkingDirectory();
+        Location runtimeWorkingDirectory = getRuntimeWorkingDirectory();
         JobflowInfo jobflowInfo = DirectFlowCompiler.compile(
                 flowGraph,
                 batchId,
                 flowId,
                 "test.jobflow", //$NON-NLS-1$
-                MapReduceCompierUtil.createWorkingLocation(runtimeDirectory),
+                runtimeWorkingDirectory,
                 buildDirectory,
                 MapReduceCompierUtil.computeEmbeddedLibraries(configuration, dsl),
                 configuration.getClassLoader(),
@@ -140,18 +143,23 @@ class MapReduceCompilerSession implements CompilerSession {
         File workingDirectory = MapReduceCompierUtil.createTemporaryDirectory(configuration.getWorkingDirectory());
         File outputDirectory = new File(workingDirectory, "output"); //$NON-NLS-1$
         File buildDirectory = new File(workingDirectory, "build"); //$NON-NLS-1$
-        String runtimeDirectory = CompilerConstants.getRuntimeWorkingDirectory();
+        Location runtimeWorkingDirectory = getRuntimeWorkingDirectory();
         JobflowInfo jobflowInfo = DirectFlowCompiler.compile(
                 entity,
                 batchId,
                 flowId,
                 "test.flowpart", //$NON-NLS-1$
-                MapReduceCompierUtil.createWorkingLocation(runtimeDirectory),
+                runtimeWorkingDirectory,
                 buildDirectory,
                 MapReduceCompierUtil.computeEmbeddedLibraries(configuration, entity.getDescription()),
                 configuration.getClassLoader(),
                 configuration.getFlowCompilerOptions());
         return toArtifact(jobflowInfo, outputDirectory);
+    }
+
+    private static Location getRuntimeWorkingDirectory() {
+        String baseRuntimeDirectory = CompilerConstants.getRuntimeWorkingDirectory();
+        return MapReduceCompierUtil.createWorkingLocation(baseRuntimeDirectory);
     }
 
     private ArtifactMirror toArtifact(BatchInfo info, File outputDirectory) {
@@ -162,7 +170,7 @@ class MapReduceCompilerSession implements CompilerSession {
                 batchId = jobflowInfo.getJobflow().getBatchId();
             }
             BasicJobflowMirror jobflow = toJobflow(jobflowInfo);
-            elements.put(jobflow.getFlowId(), jobflow);
+            elements.put(jobflow.getId(), jobflow);
         }
         assert batchId != null;
         for (Graph.Vertex<Workflow.Unit> vertex : info.getWorkflow().getGraph()) {
@@ -194,24 +202,25 @@ class MapReduceCompilerSession implements CompilerSession {
         processInput(info, result);
         processOutput(info, result);
         processMain(info, result);
+        processCleanup(info, result);
         CommandContext context = MapReduceCompierUtil.createMockCommandContext();
         for (ExternalIoCommandProvider provider : info.getCommandProviders()) {
-            processPhase(info, result, TaskMirror.Phase.INITIALIZE, provider.getInitializeCommand(context));
-            processPhase(info, result, TaskMirror.Phase.IMPORT, provider.getImportCommand(context));
-            processPhase(info, result, TaskMirror.Phase.EXPORT, provider.getExportCommand(context));
-            processPhase(info, result, TaskMirror.Phase.FINALIZE, provider.getFinalizeCommand(context));
+            processPhase(info, result, TaskInfo.Phase.INITIALIZE, provider.getInitializeCommand(context));
+            processPhase(info, result, TaskInfo.Phase.IMPORT, provider.getImportCommand(context));
+            processPhase(info, result, TaskInfo.Phase.EXPORT, provider.getExportCommand(context));
+            processPhase(info, result, TaskInfo.Phase.FINALIZE, provider.getFinalizeCommand(context));
         }
         return result;
     }
 
     private void processPhase(
             JobflowInfo info, BasicJobflowMirror result,
-            TaskMirror.Phase phase, List<ExternalIoCommandProvider.Command> commands) {
-        TaskMirror last = null;
+            TaskInfo.Phase phase, List<ExternalIoCommandProvider.Command> commands) {
+        TaskInfo last = null;
         for (ExternalIoCommandProvider.Command command : commands) {
             LinkedList<String> tokens = new LinkedList<>(command.getCommandTokens());
             String file = tokens.removeFirst();
-            BasicCommandTaskMirror task = new BasicCommandTaskMirror(
+            BasicCommandTaskInfo task = new BasicCommandTaskInfo(
                     command.getModuleName(),
                     command.getProfileName(),
                     MapReduceCompierUtil.resolveCommand(file),
@@ -225,15 +234,22 @@ class MapReduceCompilerSession implements CompilerSession {
     }
 
     private void processMain(JobflowInfo info, BasicJobflowMirror result) {
-        TaskMirror last = null;
+        TaskInfo last = null;
         for (StageInfo stage : info.getStages()) {
-            BasicHadoopTaskMirror task = new BasicHadoopTaskMirror(stage.getClassName());
+            BasicHadoopTaskInfo task = new BasicHadoopTaskInfo(stage.getClassName());
             if (last != null) {
                 task.addBlocker(last);
             }
-            result.addTask(TaskMirror.Phase.MAIN, task);
+            result.addTask(TaskInfo.Phase.MAIN, task);
             last = task;
         }
+    }
+
+    private void processCleanup(JobflowInfo info, BasicJobflowMirror result) {
+        Location workingDirectory = getRuntimeWorkingDirectory();
+        result.addTask(TaskInfo.Phase.CLEANUP, new BasicDeleteTaskInfo(
+                DeleteTaskInfo.PathKind.HADOOP_FILE_SYSTEM,
+                workingDirectory.toPath('/')));
     }
 
     private void processInput(JobflowInfo info, BasicJobflowMirror result) {
