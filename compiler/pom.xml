@@ -20,6 +20,7 @@
     <module>hive</module>
     <module>windgate</module>
     <module>yaess</module>
+    <module>workflow</module>
 
     <module>batchspec</module>
     <module>inspection</module>

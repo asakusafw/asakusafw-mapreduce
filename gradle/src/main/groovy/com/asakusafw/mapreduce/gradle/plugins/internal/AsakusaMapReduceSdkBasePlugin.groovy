@@ -76,8 +76,11 @@ class AsakusaMapReduceSdkBasePlugin implements Plugin<Project> {
                 if (features.core) {
                     asakusaMapreduceCommon "com.asakusafw.mapreduce.compiler:asakusa-mapreduce-compiler-core:${base.featureVersion}"
                     asakusaMapreduceCommon "com.asakusafw.mapreduce.compiler:asakusa-mapreduce-compiler-extension-inspection:${base.featureVersion}"
-                    asakusaMapreduceCommon "com.asakusafw.mapreduce.compiler:asakusa-mapreduce-compiler-extension-yaess:${base.featureVersion}"
+                    asakusaMapreduceCommon "com.asakusafw.mapreduce.compiler:asakusa-mapreduce-compiler-extension-workflow:${base.featureVersion}"
                     asakusaMapreduceCompiler "com.asakusafw.mapreduce.compiler:asakusa-mapreduce-compiler-cli:${base.featureVersion}"
+                    if (features.yaess) {
+                        asakusaMapreduceCommon "com.asakusafw.mapreduce.compiler:asakusa-mapreduce-compiler-extension-yaess:${base.featureVersion}"
+                    }
                     if (features.directio) {
                         asakusaMapreduceCommon "com.asakusafw.mapreduce.compiler:asakusa-mapreduce-compiler-extension-directio:${base.featureVersion}"
                     }
