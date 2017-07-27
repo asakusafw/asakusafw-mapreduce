@@ -32,7 +32,7 @@ class AsakusaMapReduceTestkit implements AsakusaTestkit {
 
     @Override
     int getPriority() {
-        return 100
+        return 1
     }
 
     @Override
