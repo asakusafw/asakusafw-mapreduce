@@ -28,9 +28,9 @@ import com.asakusafw.compiler.flow.FlowCompilerOptions;
 import com.asakusafw.compiler.flow.Location;
 import com.asakusafw.compiler.testing.DirectFlowCompiler;
 import com.asakusafw.runtime.stage.StageConstants;
-import com.asakusafw.testdriver.compiler.CommandToken;
 import com.asakusafw.testdriver.compiler.CompilerConfiguration.DebugLevel;
 import com.asakusafw.testdriver.compiler.CompilerConfiguration.OptimizeLevel;
+import com.asakusafw.workflow.model.CommandToken;
 
 /**
  * Utilities for MapReduce compiler.
