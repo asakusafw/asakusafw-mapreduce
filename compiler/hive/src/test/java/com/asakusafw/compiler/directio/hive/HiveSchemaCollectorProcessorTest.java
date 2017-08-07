@@ -39,9 +39,9 @@ import com.asakusafw.compiler.flow.FlowCompilerOptions;
 import com.asakusafw.compiler.flow.Location;
 import com.asakusafw.compiler.testing.BatchInfo;
 import com.asakusafw.compiler.testing.DirectBatchCompiler;
-import com.asakusafw.directio.hive.info.InputInfo;
-import com.asakusafw.directio.hive.info.OutputInfo;
-import com.asakusafw.directio.hive.info.TableInfo;
+import com.asakusafw.info.hive.HiveInputInfo;
+import com.asakusafw.info.hive.HiveOutputInfo;
+import com.asakusafw.info.hive.TableInfo;
 import com.asakusafw.vocabulary.batch.BatchDescription;
 
 /**
@@ -62,11 +62,11 @@ public class HiveSchemaCollectorProcessorTest {
     @Test
     public void simple() throws Exception {
         File dir = compile(SimpleBatch.class);
-        check(dir, new InputInfo[] {
-                new MockInputDescription.A().toInfo(),
+        check(dir, new HiveInputInfo[] {
+                new MockInputDescription.A().toInfo("i0"),
         });
-        check(dir, new OutputInfo[] {
-                new MockOutputDescription.A().toInfo(),
+        check(dir, new HiveOutputInfo[] {
+                new MockOutputDescription.A().toInfo("o0"),
         });
     }
 
@@ -77,13 +77,13 @@ public class HiveSchemaCollectorProcessorTest {
     @Test
     public void multiple() throws Exception {
         File dir = compile(DualBatch.class);
-        check(dir, new InputInfo[] {
-                new MockInputDescription.A().toInfo(),
-                new MockInputDescription.B().toInfo(),
+        check(dir, new HiveInputInfo[] {
+                new MockInputDescription.A().toInfo("i0"),
+                new MockInputDescription.B().toInfo("i1"),
         });
-        check(dir, new OutputInfo[] {
-                new MockOutputDescription.C().toInfo(),
-                new MockOutputDescription.D().toInfo(),
+        check(dir, new HiveOutputInfo[] {
+                new MockOutputDescription.C().toInfo("o0"),
+                new MockOutputDescription.D().toInfo("o1"),
         });
     }
 
@@ -94,8 +94,8 @@ public class HiveSchemaCollectorProcessorTest {
     @Test
     public void other() throws Exception {
         File dir = compile(OtherBatch.class);
-        check(dir, new InputInfo[0]);
-        check(dir, new OutputInfo[0]);
+        check(dir, new HiveInputInfo[0]);
+        check(dir, new HiveOutputInfo[0]);
     }
 
     private File compile(Class<? extends BatchDescription> batch) throws IOException {
@@ -113,12 +113,12 @@ public class HiveSchemaCollectorProcessorTest {
         return info.getOutputDirectory();
     }
 
-    private void check(File base, InputInfo[] elements) throws IOException {
-        check(new File(base, HiveSchemaCollectorProcessor.PATH_INPUT), InputInfo.class, Arrays.asList(elements));
+    private void check(File base, HiveInputInfo[] elements) throws IOException {
+        check(new File(base, HiveSchemaCollectorProcessor.PATH_INPUT), HiveInputInfo.class, Arrays.asList(elements));
     }
 
-    private void check(File base, OutputInfo[] elements) throws IOException {
-        check(new File(base, HiveSchemaCollectorProcessor.PATH_OUTPUT), OutputInfo.class, Arrays.asList(elements));
+    private void check(File base, HiveOutputInfo[] elements) throws IOException {
+        check(new File(base, HiveSchemaCollectorProcessor.PATH_OUTPUT), HiveOutputInfo.class, Arrays.asList(elements));
     }
 
     private <T extends TableInfo.Provider> void check(File file, Class<T> type, List<T> elements) throws IOException {

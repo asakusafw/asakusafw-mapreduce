@@ -15,9 +15,9 @@
  */
 package com.asakusafw.compiler.directio.hive.testing;
 
-import com.asakusafw.directio.hive.info.LocationInfo;
-import com.asakusafw.directio.hive.info.OutputInfo;
-import com.asakusafw.directio.hive.info.TableInfo;
+import com.asakusafw.info.hive.LocationInfo;
+import com.asakusafw.info.hive.HiveOutputInfo;
+import com.asakusafw.info.hive.TableInfo;
 import com.asakusafw.runtime.directio.DataFormat;
 import com.asakusafw.vocabulary.directio.DirectFileOutputDescription;
 
@@ -30,9 +30,11 @@ public abstract class MockOutputDescription extends DirectFileOutputDescription 
         this.format = format;
     }
 
-    public OutputInfo toInfo() {
+    public HiveOutputInfo toInfo(String name) {
         try {
-            return new OutputInfo(
+            return new HiveOutputInfo(
+                    name,
+                    getClass().getName(),
                     new LocationInfo(getBasePath(), getResourcePattern()),
                     getFormat()
                         .asSubclass(TableInfo.Provider.class)

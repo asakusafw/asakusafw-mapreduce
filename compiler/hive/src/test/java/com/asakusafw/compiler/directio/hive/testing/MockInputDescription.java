@@ -15,9 +15,9 @@
  */
 package com.asakusafw.compiler.directio.hive.testing;
 
-import com.asakusafw.directio.hive.info.InputInfo;
-import com.asakusafw.directio.hive.info.LocationInfo;
-import com.asakusafw.directio.hive.info.TableInfo;
+import com.asakusafw.info.hive.HiveInputInfo;
+import com.asakusafw.info.hive.LocationInfo;
+import com.asakusafw.info.hive.TableInfo;
 import com.asakusafw.runtime.directio.DataFormat;
 import com.asakusafw.vocabulary.directio.DirectFileInputDescription;
 
@@ -30,9 +30,11 @@ public abstract class MockInputDescription extends DirectFileInputDescription {
         this.format = format;
     }
 
-    public InputInfo toInfo() {
+    public HiveInputInfo toInfo(String name) {
         try {
-            return new InputInfo(
+            return new HiveInputInfo(
+                    name,
+                    getClass().getName(),
                     new LocationInfo(getBasePath(), getResourcePattern()),
                     getFormat()
                         .asSubclass(TableInfo.Provider.class)

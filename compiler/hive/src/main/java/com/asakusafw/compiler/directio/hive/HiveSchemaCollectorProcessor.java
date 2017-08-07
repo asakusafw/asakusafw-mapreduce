@@ -33,15 +33,17 @@ import com.asakusafw.compiler.batch.WorkDescriptionProcessor;
 import com.asakusafw.compiler.batch.Workflow;
 import com.asakusafw.compiler.batch.processor.JobFlowWorkDescriptionProcessor;
 import com.asakusafw.compiler.flow.jobflow.JobflowModel;
-import com.asakusafw.directio.hive.info.InputInfo;
-import com.asakusafw.directio.hive.info.LocationInfo;
-import com.asakusafw.directio.hive.info.OutputInfo;
-import com.asakusafw.directio.hive.info.TableInfo;
+import com.asakusafw.info.hive.HiveInputInfo;
+import com.asakusafw.info.hive.HiveOutputInfo;
+import com.asakusafw.info.hive.LocationInfo;
+import com.asakusafw.info.hive.TableInfo;
 import com.asakusafw.runtime.directio.DataFormat;
 import com.asakusafw.vocabulary.directio.DirectFileInputDescription;
 import com.asakusafw.vocabulary.directio.DirectFileOutputDescription;
 import com.asakusafw.vocabulary.external.ExporterDescription;
 import com.asakusafw.vocabulary.external.ImporterDescription;
+import com.asakusafw.vocabulary.flow.graph.InputDescription;
+import com.asakusafw.vocabulary.flow.graph.OutputDescription;
 
 /**
  * Collects Hive table definition and puts their schema information into compilation results.
@@ -79,16 +81,16 @@ public class HiveSchemaCollectorProcessor extends AbstractWorkflowProcessor {
         Context context = new Context();
         processBatch(context, workflow);
 
-        List<InputInfo> inputs = normalize(context.inputs);
+        List<HiveInputInfo> inputs = normalize(context.inputs);
         LOG.debug("generating Hive input table schema: {} entries", inputs.size());
         try (OutputStream stream = getEnvironment().openResource(PATH_INPUT)) {
-            Persistent.write(InputInfo.class, inputs, stream);
+            Persistent.write(HiveInputInfo.class, inputs, stream);
         }
 
-        List<OutputInfo> outputs = normalize(context.outputs);
+        List<HiveOutputInfo> outputs = normalize(context.outputs);
         LOG.debug("generating Hive input table schema: {} entries", inputs.size());
         try (OutputStream stream = getEnvironment().openResource(PATH_OUTPUT)) {
-            Persistent.write(OutputInfo.class, outputs, stream);
+            Persistent.write(HiveOutputInfo.class, outputs, stream);
         }
     }
 
@@ -102,35 +104,39 @@ public class HiveSchemaCollectorProcessor extends AbstractWorkflowProcessor {
     private void processJobflow(Context context, JobflowModel jobflow) {
         LOG.debug("collectiong Hive inputs/outputs from jobflow: {}", jobflow.getFlowId());
         for (JobflowModel.Import node : jobflow.getImports()) {
-            ImporterDescription description = node.getDescription().getImporterDescription();
+            InputDescription port = node.getDescription();
+            ImporterDescription description = port.getImporterDescription();
             if (description instanceof DirectFileInputDescription) {
-                processInput(context, (DirectFileInputDescription) description);
+                processInput(context, port.getName(), (DirectFileInputDescription) description);
             }
         }
         for (JobflowModel.Export node : jobflow.getExports()) {
-            ExporterDescription description = node.getDescription().getExporterDescription();
+            OutputDescription port = node.getDescription();
+            ExporterDescription description = port.getExporterDescription();
             if (description instanceof DirectFileOutputDescription) {
-                processOutput(context, (DirectFileOutputDescription) description);
+                processOutput(context, port.getName(), (DirectFileOutputDescription) description);
             }
         }
     }
 
-    private void processInput(Context context, DirectFileInputDescription description) {
+    private void processInput(Context context, String name, DirectFileInputDescription description) {
         TableInfo info = processDataFormat(description.getFormat());
         if (info == null) {
             return;
         }
-        context.inputs.add(new InputInfo(
+        context.inputs.add(new HiveInputInfo(
+                name, description.getClass().getName(),
                 new LocationInfo(description.getBasePath(), description.getResourcePattern()),
                 info));
     }
 
-    private void processOutput(Context context, DirectFileOutputDescription description) {
+    private void processOutput(Context context, String name, DirectFileOutputDescription description) {
         TableInfo info = processDataFormat(description.getFormat());
         if (info == null) {
             return;
         }
-        context.outputs.add(new OutputInfo(
+        context.outputs.add(new HiveOutputInfo(
+                name, description.getClass().getName(),
                 new LocationInfo(description.getBasePath(), description.getResourcePattern()),
                 info));
     }
@@ -179,9 +185,9 @@ public class HiveSchemaCollectorProcessor extends AbstractWorkflowProcessor {
 
     private static class Context {
 
-        final List<InputInfo> inputs = new ArrayList<>();
+        final List<HiveInputInfo> inputs = new ArrayList<>();
 
-        final List<OutputInfo> outputs = new ArrayList<>();
+        final List<HiveOutputInfo> outputs = new ArrayList<>();
 
         Context() {
             return;
