@@ -25,4 +25,8 @@
     <name>com.asakusafw.output.system.dir</name>
     <value>@project.home.uri@/var/system</value>
   </property>
+  <property>
+    <name>com.asakusafw.inprocess.limit</name>
+    <value>10000000</value>
+  </property>
 </configuration>

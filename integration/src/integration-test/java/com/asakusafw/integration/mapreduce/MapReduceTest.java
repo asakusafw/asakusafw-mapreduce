@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -146,9 +145,6 @@ public class MapReduceTest {
     public void test_mapreduce() {
         AsakusaProject project = provider.newInstance("prj")
                 .with(PropertyConfigurator.of("sdk.testkit", "mapreduce"));
-
-        requireHadoop(project);
-
         project.gradle("installAsakusafw", "test");
     }
 
@@ -159,8 +155,6 @@ public class MapReduceTest {
     public void yaess() {
         AsakusaProject project = provider.newInstance("prj");
         project.gradle("attachMapreduceBatchapps", "installAsakusafw");
-
-        requireHadoop(project);
 
         String[] csv = new String[] {
                 "1,1.0,A",
@@ -191,8 +185,6 @@ public class MapReduceTest {
     public void yaess_windgate() {
         AsakusaProject project = provider.newInstance("prj");
 
-        requireHadoop(project);
-
         project.gradle("attachMapreduceBatchapps", "installAsakusafw");
 
         String[] csv = new String[] {
@@ -214,13 +206,5 @@ public class MapReduceTest {
                 .collect(Collectors.toList());
             assertThat(results, containsInAnyOrder(csv));
         });
-    }
-
-    private static void requireHadoop(AsakusaProject project) {
-        // FIXME: MapReduce always requires hadoop command
-        Assume.assumeThat(
-                "MapReduce requires hadoop command",
-                project.environment("HADOOP_CMD"),
-                is(notNullValue()));
     }
 }
