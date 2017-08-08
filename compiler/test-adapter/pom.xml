@@ -34,7 +34,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>asakusa-mapreduce-compiler-extension-yaess</artifactId>
+      <artifactId>asakusa-mapreduce-compiler-extension-workflow</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
