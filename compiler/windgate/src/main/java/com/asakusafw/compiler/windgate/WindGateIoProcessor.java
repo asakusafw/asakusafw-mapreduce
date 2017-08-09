@@ -70,9 +70,9 @@ public class WindGateIoProcessor extends ExternalIoDescriptionProcessor {
      */
     public static final String MODULE_NAME = Constants.MODULE_NAME;
 
-    private static final String CMD_PROCESS = "windgate/bin/process.sh"; //$NON-NLS-1$
+    private static final String CMD_PROCESS = "windgate/bin/process"; //$NON-NLS-1$
 
-    private static final String CMD_FINALIZE = "windgate/bin/finalize.sh"; //$NON-NLS-1$
+    private static final String CMD_FINALIZE = "windgate/bin/finalize"; //$NON-NLS-1$
 
     private static final String OPT_IMPORT = "import"; //$NON-NLS-1$
 
