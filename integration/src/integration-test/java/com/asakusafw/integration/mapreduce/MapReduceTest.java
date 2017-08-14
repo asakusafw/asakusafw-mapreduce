@@ -36,6 +36,7 @@ import com.asakusafw.integration.AsakusaConfigurator;
 import com.asakusafw.integration.AsakusaConstants;
 import com.asakusafw.integration.AsakusaProject;
 import com.asakusafw.integration.AsakusaProjectProvider;
+import com.asakusafw.integration.PlatformUtil;
 import com.asakusafw.utils.gradle.Bundle;
 import com.asakusafw.utils.gradle.ContentsConfigurator;
 import com.asakusafw.utils.gradle.PropertyConfigurator;
@@ -144,6 +145,8 @@ public class MapReduceTest {
      */
     @Test
     public void test_mapreduce() {
+        PlatformUtil.skipIfWindows();
+
         AsakusaProject project = provider.newInstance("prj")
                 .with(PropertyConfigurator.of("sdk.testkit", "mapreduce"));
         project.gradle("installAsakusafw", "test");
@@ -163,6 +166,8 @@ public class MapReduceTest {
      */
     @Test
     public void yaess() {
+        PlatformUtil.skipIfWindows();
+
         AsakusaProject project = provider.newInstance("prj");
         project.gradle("attachMapreduceBatchapps", "installAsakusafw");
 
@@ -193,6 +198,8 @@ public class MapReduceTest {
      */
     @Test
     public void yaess_windgate() {
+        PlatformUtil.skipIfWindows();
+
         AsakusaProject project = provider.newInstance("prj");
 
         project.gradle("attachMapreduceBatchapps", "installAsakusafw");
