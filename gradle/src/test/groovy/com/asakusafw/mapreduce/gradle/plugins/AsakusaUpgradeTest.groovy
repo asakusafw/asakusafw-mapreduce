@@ -50,6 +50,14 @@ class AsakusaUpgradeTest {
     }
 
     /**
+     * Test for {@code 4.1} (Asakusa on MapReduce {@code 0.10.0}).
+     */
+    @Test
+    void 'v4.1'() {
+        doUpgradeFromTestName()
+    }
+
+    /**
      * Test for {@code 3.4.1} (Asakusa on MapReduce {@code 0.9.2}).
      */
     @Test
