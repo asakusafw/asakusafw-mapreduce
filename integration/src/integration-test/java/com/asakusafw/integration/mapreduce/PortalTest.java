@@ -68,11 +68,11 @@ public class PortalTest {
     }
 
     /**
-     * {@code draw jobflow}.
+     * {@code generate dot jobflow}.
      */
     @Test
-    public void draw_jobflow() {
-        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "draw", "jobflow", "-v",
+    public void generate_dot_jobflow() {
+        framework.withLaunch(AsakusaConstants.CMD_PORTAL, "generate", "dot", "jobflow", "-v",
                 "perf.average.sort");
     }
 }
