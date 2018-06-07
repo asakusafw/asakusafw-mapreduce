@@ -4,7 +4,7 @@
   <name>Asakusa on MapReduce</name>
   <groupId>com.asakusafw.mapreduce</groupId>
   <artifactId>project</artifactId>
-  <version>0.10.1-RC1</version>
+  <version>0.10.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <url>http://asakusafw.com</url>
@@ -26,7 +26,7 @@
     <connection>scm:git:git@github.com:asakusafw/asakusafw-mapreduce.git</connection>
     <developerConnection>scm:git:git@github.com:asakusafw/asakusafw-mapreduce.git</developerConnection>
     <url>https://github.com/asakusafw/asakusafw-mapreduce</url>
-    <tag>0.10.1-RC1</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
