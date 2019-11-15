@@ -1,6 +1,6 @@
 # Asakusa on MapReduce
 
-Asakusa on MapReduce provides faciities that make [Asakusa](https://github.com/asakusafw/asakusafw) batch applications run on [Hadoop](http://hadoop.apache.org/) MapReduce framework.
+Asakusa on MapReduce provides faciities that make [Asakusa](https://github.com/asakusafw/asakusafw) batch applications run on [Hadoop](https://hadoop.apache.org/) MapReduce framework.
 
 
 This project includes the followings:
