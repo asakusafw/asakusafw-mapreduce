@@ -7,7 +7,7 @@
   <parent>
     <artifactId>project</artifactId>
     <groupId>com.asakusafw.mapreduce</groupId>
-    <version>0.10.4-SNAPSHOT</version>
+    <version>0.10.4</version>
   </parent>
 
   <packaging>pom</packaging>
